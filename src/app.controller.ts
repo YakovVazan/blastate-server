@@ -20,11 +20,4 @@ export class AppController {
   async login(@Request() req) {
     return await this.authService.login(req.user);
   }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('heatmap')
-  async getHeatmap(@Request() req) {
-    console.log(req.user);
-    return req.user;
-  }
 }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { HeatmapService } from './heatmap.service';
 import { HeatmapController } from './heatmap.controller';
+import { HeatmapService } from './heatmap.service';
 
 @Module({
   controllers: [HeatmapController],

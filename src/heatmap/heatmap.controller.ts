@@ -1,34 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { HeatmapService } from './heatmap.service';
-import { CreateHeatmapDto } from './dto/create-heatmap.dto';
-import { UpdateHeatmapDto } from './dto/update-heatmap.dto';
 
 @Controller('heatmap')
 export class HeatmapController {
-  constructor(private readonly heatmapService: HeatmapService) {}
+  constructor(private heatmapService: HeatmapService) {}
 
-  @Post()
-  create(@Body() createHeatmapDto: CreateHeatmapDto) {
-    return this.heatmapService.create(createHeatmapDto);
-  }
-
+  @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
-    return this.heatmapService.findAll();
-  }
+  async getHeatmap(@Body('city') city) {
+    if (!city)
+      throw new HttpException('City is required', HttpStatus.BAD_REQUEST);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.heatmapService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateHeatmapDto: UpdateHeatmapDto) {
-    return this.heatmapService.update(+id, updateHeatmapDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.heatmapService.remove(+id);
+    return this.heatmapService.getHeatmapByCity(city);
   }
 }
