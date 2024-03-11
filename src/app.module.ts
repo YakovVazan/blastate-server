@@ -4,9 +4,21 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CitiesModule } from './cities/cities.module';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, HeatmapModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    CitiesModule,
+    AlertsModule,
+    HeatmapModule,
+    MongooseModule.forRoot(
+      'mongodb+srv://yakovvazan:Ku2orSNr9ygUq0qn@realblastate.nibi1ky.mongodb.net/',
+    ),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
