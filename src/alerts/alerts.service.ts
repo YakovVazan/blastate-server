@@ -28,12 +28,13 @@ export class AlertsService {
     result.forEach((entry: { _id: string; count: number }) => {
       const city = latLng.find((city) => city.hebName === entry._id);
 
-      countsByCity.push({
-        city: entry._id,
-        alerts: entry.count,
-        lat: city?.lat,
-        lng: city?.lng,
-      });
+      (city?.lat || city?.lng) &&
+        countsByCity.push({
+          city: entry._id,
+          alerts: entry.count,
+          lat: city.lat,
+          lng: city.lng,
+        });
     });
 
     return countsByCity;
