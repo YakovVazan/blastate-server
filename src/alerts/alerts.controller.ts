@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AlertsService } from './alerts.service';
 import { Alert } from 'src/schemas/alert.schema';
+import { heatmapDetails } from 'src/interfaces/heatmapDetails.interface';
 
 @Controller('alerts')
 export class AlertsController {
@@ -14,8 +15,14 @@ export class AlertsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('all')
+  getAllAlerts(): Promise<heatmapDetails[]> {
+    return this.alertsService.getAllAlerts();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post('count')
-  getCountByCity(@Body('city') city: string): Promise<number> {    
+  getCountByCity(@Body('city') city: string): Promise<number> {
     return this.alertsService.getCountByCity(city);
   }
 
