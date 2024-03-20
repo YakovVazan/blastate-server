@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import { CitiesService } from 'src/cities/cities.service';
 import { Alert } from 'src/schemas/alert.schema';
 import { heatmapDetails } from 'src/interfaces/heatmapDetails.interface';
@@ -12,36 +12,56 @@ export class AlertsService {
     private citiesService: CitiesService,
   ) {}
 
-  async getAlertsByCity(city: string): Promise<Alert[]> {
-    return this.alertModel.find({ city }).exec();
-  }
-
-  async getAllAlerts(): Promise<heatmapDetails[]> {
+  async getAllAlerts(targetDate?: string): Promise<any> {
     const aggregationPipeline = [
-      { $group: { _id: '$city', count: { $sum: 1 } } },
+      {
+        $match: {
+          date: targetDate ? targetDate.split('T')[0] : { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: '$city',
+          count: { $sum: 1 },
+        },
+      },
     ];
 
     const result = await this.alertModel.aggregate(aggregationPipeline).exec();
-
     const latLng = await this.citiesService.getCities();
     const countsByCity: heatmapDetails[] = [];
-    result.forEach((entry: { _id: string; count: number }) => {
-      const city = latLng.find((city) => city.hebName === entry._id);
+    let sumAlerts: number = 0;
 
-      (city?.lat || city?.lng) &&
+    result.forEach((entry: { _id: string; count: number }) => {
+      const city = latLng.find((city) => entry._id.includes(city.hebName));
+
+      if (city?.lat || city?.lng) {
+        sumAlerts += entry.count;
         countsByCity.push({
           city: entry._id,
           alerts: entry.count,
           lat: city.lat,
           lng: city.lng,
         });
+      }
     });
 
-    return countsByCity;
+    return { countsByCity, sumAlerts };
   }
 
-  async getCountByCity(city: string): Promise<number> {
-    return this.alertModel.countDocuments({ city });
+  async getAlertsPerCity(city: string, targetDate: string): Promise<number> {
+    let query: FilterQuery<any> = {
+      city: { $regex: new RegExp(city, 'i') },
+    };
+
+    if (targetDate !== '') {
+      query = {
+        ...query,
+        date: targetDate,
+      };
+    }
+
+    return await this.alertModel.countDocuments(query);
   }
 
   async addAlerts(alerts: Alert[]): Promise<void> {
