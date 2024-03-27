@@ -10,17 +10,23 @@ export class AlertsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('all')
-  getAllAlerts(@Query('date') date?: string): Promise<heatmapDetails[]> {    
+  getAllAlerts(@Query('date') date?: string): Promise<heatmapDetails[]> {
     return this.alertsService.getAllAlerts(date);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('count')
-  getAlertsPerCity(
+  getSumAlertsPerCity(
     @Body('city') city: string,
     @Body('targetDate') targetDate: string,
   ): Promise<number> {
-    return this.alertsService.getAlertsPerCity(city, targetDate);
+    return this.alertsService.getSumAlertsPerCity(city, targetDate);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('charts_data')
+  getDataForChartsFormat(@Body('city') city: string): Promise<number[]> {
+    return this.alertsService.getDataForChartsFormat(city);
   }
 
   @UseGuards(AuthGuard('jwt'))

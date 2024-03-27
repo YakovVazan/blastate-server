@@ -49,7 +49,7 @@ export class AlertsService {
     return { countsByCity, sumAlerts };
   }
 
-  async getAlertsPerCity(city: string, targetDate: string): Promise<number> {
+  async getSumAlertsPerCity(city: string, targetDate: string): Promise<number> {
     let query: FilterQuery<any> = {
       city: { $regex: new RegExp(city, 'i') },
     };
@@ -62,6 +62,28 @@ export class AlertsService {
     }
 
     return await this.alertModel.countDocuments(query);
+  }
+
+  async getDataForChartsFormat(city: string): Promise<number[]> {
+    // group all alerts for specific city by month
+    return await this.alertModel.aggregate([
+      {
+        $match: {
+          city: city ? { $regex: new RegExp(city, 'i') } : { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: '$date',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
   }
 
   async addAlerts(alerts: Alert[]): Promise<void> {
