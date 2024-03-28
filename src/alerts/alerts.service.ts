@@ -27,15 +27,15 @@ export class AlertsService {
       },
     ];
 
-    const result = await this.alertModel.aggregate(aggregationPipeline).exec();
-    const latLng = await this.citiesService.getCities();
+    const alerts = await this.alertModel.aggregate(aggregationPipeline).exec();
+    const cities = await this.citiesService.getCities();
     const countsByCity: heatmapDetails[] = [];
     let sumAlerts: number = 0;
 
-    result.forEach((entry: { _id: string; count: number }) => {
-      const city = latLng.find((city) => entry._id.includes(city.hebName));
+    alerts.forEach((entry: { _id: string; count: number }) => {
+      const city = cities.find((city) => entry._id.includes(city.hebName));
 
-      if (city?.lat || city?.lng) {
+      if (city) {
         sumAlerts += entry.count;
         countsByCity.push({
           city: entry._id,
